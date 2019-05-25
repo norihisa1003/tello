@@ -66,7 +66,7 @@ class DroneManager(object):
         if self.response is None:
             response = None
         else:
-            response = self.response.decode('utf-8')
+            response = self.response
         self.response = None
         return response
 
