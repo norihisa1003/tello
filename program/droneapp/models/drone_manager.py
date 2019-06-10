@@ -1,12 +1,9 @@
 import logging
 import contextlib
 import socket
-import sys
 import threading
 import time
 
-
-logging.basicConfig(level=logging.INFO, stream=sys.stdout)
 logger = logging.getLogger(__name__)
 
 DEFAULT_DISTANCE = 0.30
@@ -170,43 +167,43 @@ class DroneManager(object):
             logger.warning({'action': '_patrol', 'status': 'not_acquire'})
 
 
-if __name__ == '__main__':
-    drone_manager = DroneManager()
-
-    # drone_manager.set_speed(100)
-
-    drone_manager.takeoff()
-    time.sleep(10)
-    drone_manager.patrol()
-    time.sleep(45)
-    drone_manager.stop_patrol()
-    time.sleep(5)
-    # drone_manager.flip('l')
-    # time.sleep(5)
-    # drone_manager.flip('r')
-    # time.sleep(5)
-    # drone_manager.flip('f')
-    # time.sleep(5)
-    # drone_manager.flip('b')
-    # time.sleep(5)
-    # drone_manager.clockwise(90)
-    # time.sleep(5)
-    # drone_manager.counter_clockwise(90)
-    # time.sleep(5)
-    # drone_manager.forward()
-    # time.sleep(5)
-    # drone_manager.right()
-    # time.sleep(5)
-    # drone_manager.set_speed(10)
-    # time.sleep(1)
-    # drone_manager.back()
-    # time.sleep(5)
-    # drone_manager.left()
-    # time.sleep(5)
-    # drone_manager.up()
-    # time.sleep(5)
-    # drone_manager.down()
-    # time.sleep(5)
-
-    drone_manager.land()
-    drone_manager.stop()
+# if __name__ == '__main__':
+#     drone_manager = DroneManager()
+#
+#     # drone_manager.set_speed(100)
+#
+#     drone_manager.takeoff()
+#     time.sleep(10)
+#     drone_manager.patrol()
+#     time.sleep(45)
+#     drone_manager.stop_patrol()
+#     time.sleep(5)
+#     # drone_manager.flip('l')
+#     # time.sleep(5)
+#     # drone_manager.flip('r')
+#     # time.sleep(5)
+#     # drone_manager.flip('f')
+#     # time.sleep(5)
+#     # drone_manager.flip('b')
+#     # time.sleep(5)
+#     # drone_manager.clockwise(90)
+#     # time.sleep(5)
+#     # drone_manager.counter_clockwise(90)
+#     # time.sleep(5)
+#     # drone_manager.forward()
+#     # time.sleep(5)
+#     # drone_manager.right()
+#     # time.sleep(5)
+#     # drone_manager.set_speed(10)
+#     # time.sleep(1)
+#     # drone_manager.back()
+#     # time.sleep(5)
+#     # drone_manager.left()
+#     # time.sleep(5)
+#     # drone_manager.up()
+#     # time.sleep(5)
+#     # drone_manager.down()
+#     # time.sleep(5)
+#
+#     drone_manager.land()
+#     drone_manager.stop()
