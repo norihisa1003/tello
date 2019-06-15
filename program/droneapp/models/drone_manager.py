@@ -26,6 +26,12 @@ FRAME_CENTER_Y = FRAME_Y / 2
 CMD_FFMPEG = (f'ffmpeg -hwaccel auto -hwaccel_device opencl -i pipe:0 '
               f'-pix_fmt bgr24 -s {FRAME_X}x{FRAME_Y} -f rawvideo pipe:1')
 
+FACE_DETECT_XML_FILE = './droneapp/models/haarcascade_frontalface_default.xml'
+
+
+class ErrorNoFaceDetectXMLFile(Exception):
+    """Error no face detect xml file"""
+
 
 class DroneManager(metaclass=Singleton):
     def __init__(self, host_ip='192.168.10.2', host_port=8889,
@@ -60,6 +66,11 @@ class DroneManager(metaclass=Singleton):
             target=self.receive_video,
             args=(self.stop_event, self.proc_stdin, self.host_ip, self.video_port,))
         self._receive_video_thread.start()
+
+        if not os.path.exists(FACE_DETECT_XML_FILE):
+            raise ErrorNoFaceDetectXMLFile(f'No {FACE_DETECT_XML_FILE}')
+        self.face_cascade = cv.CascadeClassifier(FACE_DETECT_XML_FILE)
+        self._is_enable_face_detect = False
 
         self.send_command('command')
         self.send_command('streamon')
@@ -242,8 +253,24 @@ class DroneManager(metaclass=Singleton):
             frame = np.fromstring(frame, np.uint8).reshape(FRAME_Y, FRAME_X, 3)
             yield frame
 
+    def enable_face_detect(self):
+        self._is_enable_face_detect = True
+
+    def disable_face_detect(self):
+        self._is_enable_face_detect = False
+
     def video_jpeg_generator(self):
         for frame in self.video_binary_generator():
+            if self._is_enable_face_detect:
+                if self.is_patrol:
+                    self.stop_patrol()
+
+                gray = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
+                faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
+                for (x, y, w, h) in faces:
+                    cv.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+                    break
+
             _, jpeg = cv.imencode('.jpg', frame)
             jpeg_binary = jpeg.tobytes()
             yield jpeg_binary
