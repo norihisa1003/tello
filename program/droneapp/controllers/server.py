@@ -47,7 +47,7 @@ def command():
         drone.back()
     if cmd == 'clockwise':
         drone.clockwise()
-    if cmd == 'counter_clockwise':
+    if cmd == 'counterClockwise':
         drone.counter_clockwise()
     if cmd == 'left':
         drone.left()
