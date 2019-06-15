@@ -51,7 +51,7 @@ def command():
         drone.counter_clockwise()
     if cmd == 'left':
         drone.left()
-    if cmd == 'rigth':
+    if cmd == 'right':
         drone.right()
     if cmd == 'flipFront':
         drone.flip_front()

@@ -7,7 +7,7 @@ class Singleton(type):
         if cls.instance is None:
             print('call')
             cls.instance = super(Singleton, cls).__call__(*args, **kwargs)
-            return cls.instance
+        return cls.instance
 
 
 class T(metaclass=Singleton):
