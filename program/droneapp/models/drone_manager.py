@@ -212,7 +212,7 @@ class DroneManager(metaclass=Singleton):
             while not stop_event.is_set():
                 try:
                     size, addr = sock_video.recvfrom_into(data)
-                    logger.info({'action': 'receive_video', 'data': data})
+                    # logger.info({'action': 'receive_video', 'data': data})
                 except socket.timeout as ex:
                     logger.warning({'action': 'receive_video', 'ex': ex})
                     time.sleep(.5)
@@ -227,6 +227,26 @@ class DroneManager(metaclass=Singleton):
                 except Exception as ex:
                     logger.error({'action': 'receive_video', 'ex': ex})
                     break
+
+    def video_binary_generator(self):
+        while True:
+            try:
+                frame = self.proc_stdout.read(FRAME_SIZE)
+            except Exception as ex:
+                logger.error({'action': 'video_binary_generator', 'ex': ex})
+                continue
+
+            if not frame:
+                continue
+
+            frame = np.fromstring(frame, np.uint8).reshape(FRAME_Y, FRAME_X, 3)
+            yield frame
+
+    def video_jpeg_generator(self):
+        for frame in self.video_binary_generator():
+            _, jpeg = cv.imencode('.jpg', frame)
+            jpeg_binary = jpeg.tobytes()
+            yield jpeg_binary
 
 # if __name__ == '__main__':
 #     drone_manager = DroneManager()

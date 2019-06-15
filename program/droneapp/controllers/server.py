@@ -3,6 +3,7 @@ import config
 from flask import render_template
 from flask import request
 from flask import jsonify
+from flask import Response
 from droneapp.models.drone_manager import DroneManager
 
 logger = logging.getLogger(__name__)
@@ -67,6 +68,18 @@ def command():
         drone.stop_patrol()
 
     return jsonify(status='success'), 200
+
+
+def video_generator():
+    drone = get_drone()
+    for jpeg in drone.video_jpeg_generator():
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + jpeg + b'\r\n\r\n')
+
+
+@app.route('/video/streaming')
+def video_feed():
+    return Response(video_generator(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 
 def run():
