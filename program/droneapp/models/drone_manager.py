@@ -3,6 +3,7 @@ import contextlib
 import socket
 import threading
 import time
+from droneapp.models.base import Singleton
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +12,7 @@ DEFAULT_SPEED = 10
 DEFAULT_DEGREE = 10
 
 
-class DroneManager(object):
+class DroneManager(metaclass=Singleton):
     def __init__(self, host_ip='192.168.10.2', host_port=8889,
                  drone_ip='192.168.10.1', drone_port=8889, is_imperial=False, speed=DEFAULT_SPEED):
         self.host_ip = host_ip
@@ -121,8 +122,17 @@ class DroneManager(object):
     def counter_clockwise(self, degree=DEFAULT_DEGREE):
         return self.send_command(f'ccw {degree}')
     
-    def flip(self, direction):
-        return self.send_command(f'flip {direction}')
+    def flip_front(self):
+        return self.send_command(f'flip f')
+
+    def flip_back(self):
+        return self.send_command(f'flip b')
+
+    def flip_left(self):
+        return self.send_command(f'flip l')
+
+    def flip_right(self):
+        return self.send_command(f'flip r')
 
     def patrol(self):
         if not self.is_patrol:
