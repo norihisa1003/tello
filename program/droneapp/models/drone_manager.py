@@ -86,8 +86,8 @@ class DroneManager(metaclass=Singleton):
                 logger.info({'action': 'receive_response',
                              'response': self.response})
             except socket.error as ex:
-                logger.error(({'action': 'receive_response',
-                               'ex': ex}))
+                logger.error({'action': 'receive_response',
+                               'ex': ex})
                 break
 
     def __dell__(self):
@@ -116,7 +116,7 @@ class DroneManager(metaclass=Singleton):
         is_acquire = self._command_semaphore.acquire(blocking=blocking)
         if is_acquire:
             with contextlib.ExitStack() as stack:
-                stack.callback(self._command_semaphore.release())
+                stack.callback(self._command_semaphore.release)
                 logger.info({'action': 'send_command', 'command': command})
                 self.socket.sendto(command.encode('utf-8'), self.drone_address)
 
@@ -129,7 +129,7 @@ class DroneManager(metaclass=Singleton):
                 if self.response is None:
                     response = None
                 else:
-                    response = self.response
+                    response = self.response.decode('utf-8')
                 self.response = None
                 return response
 
@@ -178,16 +178,16 @@ class DroneManager(metaclass=Singleton):
         return self.send_command(f'ccw {degree}')
     
     def flip_front(self):
-        return self.send_command(f'flip f')
+        return self.send_command('flip f')
 
     def flip_back(self):
-        return self.send_command(f'flip b')
+        return self.send_command('flip b')
 
     def flip_left(self):
-        return self.send_command(f'flip l')
+        return self.send_command('flip l')
 
     def flip_right(self):
-        return self.send_command(f'flip r')
+        return self.send_command('flip r')
 
     def patrol(self):
         if not self.is_patrol:
@@ -298,7 +298,7 @@ class DroneManager(metaclass=Singleton):
                     if diff_x < -30:
                         drone_y = -30
                     if diff_x > 30:
-                        diff_y = 30
+                        drone_y = 30
                     if diff_y < -15:
                         drone_z = -30
                     if diff_y > 15:
