@@ -35,7 +35,7 @@ def command():
         drone.land()
     if cmd == 'speed':
         speed = request.form.get('speed')
-        logging.info({'action': 'command', 'speed': speed})
+        logger.info({'action': 'command', 'cmd': cmd, 'speed': speed})
         if speed:
             drone.set_speed(int(speed))
     if cmd == 'up':

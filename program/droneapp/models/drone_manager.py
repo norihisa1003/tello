@@ -79,7 +79,7 @@ class DroneManager(metaclass=Singleton):
         self._is_enable_face_detect = False
 
         if not os.path.exists(SNAPSHOT_IMAGE_FOLDER):
-            raise ErrorNoImageDir(f'{SNAPSHOT_IMAGE_FOLDER} dose not exists')
+            raise ErrorNoImageDir(f'{SNAPSHOT_IMAGE_FOLDER} does not exists')
         self.is_snapshot = False
 
         self._command_semaphore = threading.Semaphore(1)
