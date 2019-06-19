@@ -72,6 +72,9 @@ class DroneManager(metaclass=Singleton):
         self.face_cascade = cv.CascadeClassifier(FACE_DETECT_XML_FILE)
         self._is_enable_face_detect = False
 
+        self._command_semaphore = threading.Semaphore(1)
+        self._command_thread = None
+
         self.send_command('command')
         self.send_command('streamon')
         self.set_speed(self.speed)
@@ -102,22 +105,36 @@ class DroneManager(metaclass=Singleton):
         # os.kill(self.proc.pid, 9)
         os.kill(self.proc.pid, signal.CTRL_C_EVENT)
 
-    def send_command(self, command):
-        logger.info({'action': 'send_command', 'command': command})
-        self.socket.sendto(command.encode('utf-8'), self.drone_address)
+    def send_command(self, command, blocking=True):
+        self._command_thread = threading.Thread(
+            target=self._send_command,
+            args=(command, blocking,)
+        )
+        self._command_thread.start()
 
-        retry = 0
-        while self.response is None:
-            time.sleep(0.3)
-            if retry > 3:
-                break
-            retry += 1
-        if self.response is None:
-            response = None
+    def _send_command(self, command, blocking=True):
+        is_acquire = self._command_semaphore.acquire(blocking=blocking)
+        if is_acquire:
+            with contextlib.ExitStack() as stack:
+                stack.callback(self._command_semaphore.release())
+                logger.info({'action': 'send_command', 'command': command})
+                self.socket.sendto(command.encode('utf-8'), self.drone_address)
+
+                retry = 0
+                while self.response is None:
+                    time.sleep(0.3)
+                    if retry > 3:
+                        break
+                    retry += 1
+                if self.response is None:
+                    response = None
+                else:
+                    response = self.response
+                self.response = None
+                return response
+
         else:
-            response = self.response
-        self.response = None
-        return response
+            logger.warning({'action': 'send_command', 'command': command, 'status': 'not_acquire'})
 
     def takeoff(self):
         return self.send_command('takeoff')
@@ -269,6 +286,29 @@ class DroneManager(metaclass=Singleton):
                 faces = self.face_cascade.detectMultiScale(gray, 1.3, 5)
                 for (x, y, w, h) in faces:
                     cv.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
+
+                    face_center_x = x + (w / 2)
+                    face_center_y = y + (h / 2)
+                    diff_x = FRAME_CENTER_X - face_center_x
+                    diff_y = FRAME_CENTER_Y - face_center_y
+                    face_area = w * h
+                    percent_face = face_area / FRAME_AREA
+
+                    drone_x, drone_y, drone_z, speed = 0, 0, 0, self.speed
+                    if diff_x < -30:
+                        drone_y = -30
+                    if diff_x > 30:
+                        diff_y = 30
+                    if diff_y < -15:
+                        drone_z = -30
+                    if diff_y > 15:
+                        drone_z = 30
+                    if percent_face > 0.30:
+                        drone_x = -30
+                    if percent_face < 0.02:
+                        drone_x = 30
+                    self.send_command(f'go {drone_x} {drone_y} {drone_z} {speed}',
+                                      blocking=False)
                     break
 
             _, jpeg = cv.imencode('.jpg', frame)
