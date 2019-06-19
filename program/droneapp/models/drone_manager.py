@@ -28,9 +28,15 @@ CMD_FFMPEG = (f'ffmpeg -hwaccel auto -hwaccel_device opencl -i pipe:0 '
 
 FACE_DETECT_XML_FILE = './droneapp/models/haarcascade_frontalface_default.xml'
 
+SNAPSHOT_IMAGE_FOLDER = './droneapp/static/img/snapshots/'
+
 
 class ErrorNoFaceDetectXMLFile(Exception):
     """Error no face detect xml file"""
+
+
+class ErrorNoImageDir(Exception):
+    """Error No Image Directory"""
 
 
 class DroneManager(metaclass=Singleton):
@@ -71,6 +77,10 @@ class DroneManager(metaclass=Singleton):
             raise ErrorNoFaceDetectXMLFile(f'No {FACE_DETECT_XML_FILE}')
         self.face_cascade = cv.CascadeClassifier(FACE_DETECT_XML_FILE)
         self._is_enable_face_detect = False
+
+        if not os.path.exists(SNAPSHOT_IMAGE_FOLDER):
+            raise ErrorNoImageDir(f'{SNAPSHOT_IMAGE_FOLDER} dose not exists')
+        self.is_snapshot = False
 
         self._command_semaphore = threading.Semaphore(1)
         self._command_thread = None
@@ -313,7 +323,28 @@ class DroneManager(metaclass=Singleton):
 
             _, jpeg = cv.imencode('.jpg', frame)
             jpeg_binary = jpeg.tobytes()
+
+            if self.is_snapshot:
+                backup_file = time.strftime('%Y%m%d-%H%M%S') + '.jpg'
+                snapshot_file = 'snapshot.jpg'
+                for filename in (backup_file, snapshot_file):
+                    file_path = os.path.join(
+                        SNAPSHOT_IMAGE_FOLDER, filename)
+                    with open(file_path, 'wb') as f:
+                        f.write(jpeg_binary)
+                self.is_snapshot = False
+
             yield jpeg_binary
+
+    def snapshot(self):
+        self.is_snapshot = True
+        retry = 0
+        while retry < 3:
+            if not self.is_snapshot:
+                return True
+            time.sleep(0.1)
+            retry += 1
+        return False
 
 # if __name__ == '__main__':
 #     drone_manager = DroneManager()
