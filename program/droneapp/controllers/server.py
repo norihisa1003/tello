@@ -5,6 +5,7 @@ from flask import request
 from flask import jsonify
 from flask import Response
 from droneapp.models.drone_manager import DroneManager
+import droneapp.models.course
 
 logger = logging.getLogger(__name__)
 app = config.app
@@ -89,6 +90,20 @@ def video_generator():
 @app.route('/video/streaming')
 def video_feed():
     return Response(video_generator(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+def get_course(course_id=None):
+    drone = get_drone()
+    courses = droneapp.models.course.get_courses(drone)
+    if course_id:
+        return courses.get(course_id)
+    return courses
+
+
+@app.route('/games/shake/')
+def game_shake():
+    courses = get_course()
+    return render_template('games/shake.html', courses=courses)
 
 
 def run():
