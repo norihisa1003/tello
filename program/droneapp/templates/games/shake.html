@@ -14,7 +14,6 @@
 
     // function to call when shake occurs
     function shakeEventDidOccur () {
-        $("#result").html('shake');
         let id = $("input[name='coursePick']:checked").val();
         $.post("/api/shake/run", {id: id}).done(function (data) {
             let result = data.elapsed.toFixed(2).toString();
@@ -41,4 +40,6 @@
 </fieldset>
 
 <a href="#" data-role="button" onclick="sendStartShake(); return false;">Start</a>
+<br>
+<a href="#" data-role="button" onclick="shakeEventDidOccur(); return false;">Start</a>
 {% endblock %}
