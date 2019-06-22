@@ -108,8 +108,9 @@ def game_shake():
 
 @app.route('/api/shake/start', methods=['GET', 'POST'])
 def shake_start():
-    couse_id = request.args.get('id')
-    course = get_course(int(couse_id))
+    # course_id = request.args.get('id')
+    course_id = request.form.get('id')
+    course = get_course(int(course_id))
     course.start()
     return jsonify(request='started'), 200
 
