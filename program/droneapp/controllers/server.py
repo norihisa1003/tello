@@ -112,7 +112,7 @@ def shake_start():
     course_id = request.form.get('id')
     course = get_course(int(course_id))
     course.start()
-    return jsonify(request='started'), 200
+    return jsonify(result='started'), 200
 
 
 @app.route('/api/shake/run', methods=['GET', 'POST'])

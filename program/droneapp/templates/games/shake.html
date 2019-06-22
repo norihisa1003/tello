@@ -18,6 +18,7 @@
     function shakeEventDidOccur () {
         let id = $("input[name='coursePick']:checked").val();
         $.post("/api/shake/run", {id: id}).done(function (data) {
+            console.info(data.elapsed)
             let result = data.elapsed.toFixed(2).toString();
             result += 's';
             if (data.running === false){
