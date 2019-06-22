@@ -10,12 +10,11 @@
     }
     var shakeEvent = new Shake();
     shakeEvent.start()
-    console.info('start shake')
     window.addEventListener('shake', shakeEventDidOccur, false);
 
     // function to call when shake occurs
     function shakeEventDidOccur () {
-        console.info('eventOccur')
+        $("#result").html('shake');
         let id = $("input[name='coursePick']:checked").val();
         $.post("/api/shake/run", {id: id}).done(function (data) {
             let result = data.elapsed.toFixed(2).toString();
