@@ -110,10 +110,8 @@ def game_shake():
 def shake_start():
     # course_id = request.args.get('id')
     course_id = request.form.get('id')
-    logger.info(f'id = {course_id}')
     course = get_course(int(course_id))
     course.start()
-    logger.info(f'course = {course}')
     return jsonify(request='started'), 200
 
 

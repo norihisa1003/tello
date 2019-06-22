@@ -5,6 +5,7 @@
     function sendStartShake() {
         let id = $("input[name='coursePick']:checked").val();
         $.post("/api/shake/start", {id: id}).done(function (data) {
+            console.info(data.result)
             $("#result").html(data.result);
         }, 'json')
     }
